@@ -1,0 +1,58 @@
+```cpp
+const int outputPin = 9; // Pin to output the PWM signal
+float frequency = 40.0;  // Default frequency (between 35 and 50 Hz)
+unsigned long period;    // Period in microseconds
+int dutyCycle = 128;     // Default duty cycle (0-255 for 0-100%)
+
+void setup() {
+  Serial.begin(9600);    // Start serial communication
+  pinMode(outputPin, OUTPUT);
+  Serial.println("PWM Signal Generator");
+  Serial.println("Enter frequency between 35 and 50 Hz:");
+}
+
+void loop() {
+  // Calculate the period based on the current frequency
+  period = 1000000 / frequency; // Period in microseconds
+
+  // Generate the PWM signal manually
+  long highTime = (period * dutyCycle) / 255;  // Calculate high time for the duty cycle
+  long lowTime = period - highTime;            // Calculate low time
+  
+  digitalWrite(outputPin, HIGH); // Set the output pin HIGH
+  delayMicroseconds(highTime);   // Wait for the high time
+
+  digitalWrite(outputPin, LOW);  // Set the output pin LOW
+  delayMicroseconds(lowTime);    // Wait for the low time
+
+  // Check for user input to change frequency or duty cycle
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n'); // Read input until newline
+    float newFrequency = input.toFloat(); // Convert input to float
+
+    // Validate the new frequency
+    if (newFrequency >= 35.0 && newFrequency <= 50.0) {
+      frequency = newFrequency; // Update frequency
+      Serial.print("Frequency updated to: ");
+      Serial.println(frequency);
+    } else {
+      Serial.println("Invalid frequency! Please enter a value between 35 and 50 Hz.");
+    }
+  }
+
+  // Optionally, you can also change the duty cycle
+  if (Serial.available() > 0) {
+    String inputDuty = Serial.readStringUntil('\n'); // Read input until newline
+    int newDutyCycle = inputDuty.toInt(); // Convert input to int
+
+    // Validate the new duty cycle
+    if (newDutyCycle >= 0 && newDutyCycle <= 255) {
+      dutyCycle = newDutyCycle; // Update duty cycle
+      Serial.print("Duty cycle updated to: ");
+      Serial.println(dutyCycle);
+    } else {
+      Serial.println("Invalid duty cycle! Please enter a value between 0 and 255.");
+    }
+  }
+}
+```
